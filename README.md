@@ -168,7 +168,7 @@ wp 84em api-catalog test
 
 Built against [RFC 9727](https://www.rfc-editor.org/rfc/rfc9727) (the `api-catalog` well-known URI) and [RFC 9264](https://www.rfc-editor.org/rfc/rfc9264) (the linkset document format).
 
-Blog post: coming soon.
+Blog post: [Every WordPress Site Has an API. Almost None Advertise It.](https://84em.to/zb6exn1)
 
 ## License
 
