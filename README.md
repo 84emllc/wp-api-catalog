@@ -56,10 +56,10 @@ link: <https://example.com/.well-known/api-catalog>; rel="api-catalog"
 
 ## Install
 
-Clone the repo, or download a zip, into `wp-content/plugins/`:
+Download [the latest release zip](https://github.com/84emllc/wp-api-catalog/releases/latest/download/wp-api-catalog.zip) and unzip it into `wp-content/plugins/`, or clone the repo:
 
 ```
-git clone <repo-url> wp-content/plugins/wp-api-catalog
+git clone https://github.com/84emllc/wp-api-catalog.git wp-content/plugins/wp-api-catalog
 ```
 
 Activate it from the Plugins screen. There's no build step and no Composer dependency to install; the plugin runs as-is. Pretty permalinks are required (Settings > Permalinks set to anything other than Plain); with plain permalinks WordPress never consults rewrite rules and the endpoint 404s.
