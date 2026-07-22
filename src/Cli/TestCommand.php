@@ -53,6 +53,8 @@ class TestCommand {
 		$this->test_cache_roundtrip();
 		$this->test_cache_disabled();
 		$this->test_cache_type_object();
+		$this->test_http_get();
+		$this->test_http_head();
 
 		$this->report();
 	}
@@ -205,6 +207,48 @@ class TestCommand {
 		Cache::delete();
 		$this->assert( null === Cache::get(), 'Cache::delete clears the object cache entry' );
 		remove_filter( 'wp_api_catalog_cache_type', $object_type );
+	}
+
+	/**
+	 * GET /.well-known/api-catalog serves the linkset with correct headers.
+	 *
+	 * @return void
+	 */
+	private function test_http_get(): void {
+		$response = wp_remote_get(
+			home_url( '/.well-known/api-catalog' ),
+			array( 'sslverify' => false )
+		);
+		if ( is_wp_error( $response ) ) {
+			$this->assert( false, 'GET request failed: ' . $response->get_error_message() );
+			return;
+		}
+		$this->assert( 200 === wp_remote_retrieve_response_code( $response ), 'GET returns 200' );
+		$this->assert( 'application/linkset+json' === wp_remote_retrieve_header( $response, 'content-type' ), 'GET content-type is application/linkset+json' );
+		$link = (string) wp_remote_retrieve_header( $response, 'link' );
+		$this->assert( false !== strpos( $link, 'rel="api-catalog"' ), 'GET carries api-catalog Link header' );
+		$body = json_decode( wp_remote_retrieve_body( $response ), true );
+		$this->assert( isset( $body['linkset'] ) && is_array( $body['linkset'] ) && array() !== $body['linkset'], 'GET body decodes to non-empty linkset' );
+	}
+
+	/**
+	 * HEAD /.well-known/api-catalog returns the Link header and no body.
+	 *
+	 * @return void
+	 */
+	private function test_http_head(): void {
+		$response = wp_remote_head(
+			home_url( '/.well-known/api-catalog' ),
+			array( 'sslverify' => false )
+		);
+		if ( is_wp_error( $response ) ) {
+			$this->assert( false, 'HEAD request failed: ' . $response->get_error_message() );
+			return;
+		}
+		$this->assert( 200 === wp_remote_retrieve_response_code( $response ), 'HEAD returns 200' );
+		$link = (string) wp_remote_retrieve_header( $response, 'link' );
+		$this->assert( false !== strpos( $link, 'rel="api-catalog"' ), 'HEAD carries api-catalog Link header' );
+		$this->assert( '' === wp_remote_retrieve_body( $response ), 'HEAD body is empty' );
 	}
 
 	/**
