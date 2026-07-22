@@ -19,6 +19,11 @@ class Endpoint {
 	public const QUERY_VAR = 'wp_api_catalog';
 
 	/**
+	 * Regex matched against the request path to route to our query var.
+	 */
+	private const REWRITE_REGEX = '^\.well-known/api-catalog/?$';
+
+	/**
 	 * Hook everything up.
 	 *
 	 * @return void
@@ -36,7 +41,24 @@ class Endpoint {
 	 * @return void
 	 */
 	public static function add_rewrite_rule(): void {
-		add_rewrite_rule( '^\.well-known/api-catalog/?$', 'index.php?' . self::QUERY_VAR . '=1', 'top' );
+		add_rewrite_rule( self::REWRITE_REGEX, 'index.php?' . self::QUERY_VAR . '=1', 'top' );
+	}
+
+	/**
+	 * Remove the rewrite rule so a stale entry doesn't survive deactivation.
+	 *
+	 * @return void
+	 */
+	public static function remove_rewrite_rule(): void {
+		global $wp_rewrite;
+
+		if ( ! isset( $wp_rewrite ) || ! is_object( $wp_rewrite ) ) {
+			return;
+		}
+
+		if ( isset( $wp_rewrite->extra_rules_top[ self::REWRITE_REGEX ] ) ) {
+			unset( $wp_rewrite->extra_rules_top[ self::REWRITE_REGEX ] );
+		}
 	}
 
 	/**

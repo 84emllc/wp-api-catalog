@@ -62,7 +62,7 @@ Clone the repo, or download a zip, into `wp-content/plugins/`:
 git clone <repo-url> wp-content/plugins/wp-api-catalog
 ```
 
-Activate it from the Plugins screen. There's no build step and no Composer dependency to install; the plugin runs as-is.
+Activate it from the Plugins screen. There's no build step and no Composer dependency to install; the plugin runs as-is. Pretty permalinks are required (Settings > Permalinks set to anything other than Plain); with plain permalinks WordPress never consults rewrite rules and the endpoint 404s.
 
 ## Verification
 
@@ -72,6 +72,14 @@ curl -sS -I https://example.com/.well-known/api-catalog
 ```
 
 The GET should return `200`, `content-type: application/linkset+json`, and a `link` header with `rel="api-catalog"`. The HEAD should return the same status and `link` header with an empty body.
+
+## Security note
+
+The catalog enumerates REST namespaces directly, so it reveals the namespace list (and thus active-plugin hints) even on sites that restrict `/wp-json/` via authentication filters. Sites that lock down the REST API should filter entries with `wp_api_catalog_entry` or remove the plugin.
+
+## Multisite note
+
+This plugin is single-site focused. On multisite, network activation flushes rewrite rules only for the network-admin site; activate per site or re-save permalinks on each sub-site.
 
 ## Filters
 
@@ -136,7 +144,7 @@ add_filter( 'wp_api_catalog_send_link_header', '__return_false' );
 
 ## Caching
 
-The built linkset is cached with a TTL: 300 seconds by default, via a transient (key `wp_api_catalog_linkset`). Set `wp_api_catalog_cache_type` to `object` to use the object cache instead (useful if the site runs Redis or Memcached). There's no invalidation hook: the TTL is the invalidation. If you add or remove a REST namespace and need the catalog to reflect it immediately, lower the TTL temporarily, or clear it directly with `wp transient delete wp_api_catalog_linkset` (transient backend) or `wp cache flush` (object cache backend).
+The built linkset is cached with a TTL: 300 seconds by default, via a transient (key `wp_api_catalog_linkset`). Set `wp_api_catalog_cache_type` to `object` to use the object cache instead (useful if the site runs Redis or Memcached). There's no invalidation hook: the TTL is the invalidation. If you add or remove a REST namespace and need the catalog to reflect it immediately, lower the TTL temporarily, or clear it directly with `wp transient delete wp_api_catalog_linkset` (transient backend) or `wp cache flush` (object cache backend). Note that `wp cache flush` flushes the entire object cache, not just this plugin's entry.
 
 ## Server config note
 

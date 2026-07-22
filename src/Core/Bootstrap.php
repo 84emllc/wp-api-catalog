@@ -27,7 +27,7 @@ class Bootstrap {
 		Endpoint::register();
 
 		register_activation_hook( $plugin_file, array( __CLASS__, 'activate' ) );
-		register_deactivation_hook( $plugin_file, 'flush_rewrite_rules' );
+		register_deactivation_hook( $plugin_file, array( __CLASS__, 'deactivate' ) );
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			\WP_CLI::add_command( '84em api-catalog', TestCommand::class );
@@ -41,6 +41,16 @@ class Bootstrap {
 	 */
 	public static function activate(): void {
 		Endpoint::add_rewrite_rule();
+		flush_rewrite_rules();
+	}
+
+	/**
+	 * Remove the rewrite rule and flush on deactivation.
+	 *
+	 * @return void
+	 */
+	public static function deactivate(): void {
+		Endpoint::remove_rewrite_rule();
 		flush_rewrite_rules();
 	}
 }
