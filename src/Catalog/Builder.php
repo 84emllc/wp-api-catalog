@@ -49,7 +49,7 @@ class Builder {
 			/**
 			 * Filters a single catalog entry.
 			 *
-			 * @param array|null $entry     Linkset entry. Return null to remove.
+			 * @param array|null $entry     Linkset entry. Return null or an empty array to remove.
 			 * @param string     $namespace REST namespace, e.g. 'wp/v2'.
 			 */
 			$entry = apply_filters( 'wp_api_catalog_entry', $entry, $namespace );
