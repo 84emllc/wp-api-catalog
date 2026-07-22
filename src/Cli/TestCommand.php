@@ -55,6 +55,7 @@ class TestCommand {
 		$this->test_cache_type_object();
 		$this->test_http_get();
 		$this->test_http_head();
+		$this->test_link_header_filter();
 
 		$this->report();
 	}
@@ -249,6 +250,19 @@ class TestCommand {
 		$link = (string) wp_remote_retrieve_header( $response, 'link' );
 		$this->assert( false !== strpos( $link, 'rel="api-catalog"' ), 'HEAD carries api-catalog Link header' );
 		$this->assert( '' === wp_remote_retrieve_body( $response ), 'HEAD body is empty' );
+	}
+
+	/**
+	 * wp_api_catalog_send_link_header false suppresses the front-end header.
+	 *
+	 * @return void
+	 */
+	private function test_link_header_filter(): void {
+		$off = static fn (): bool => false;
+		add_filter( 'wp_api_catalog_send_link_header', $off );
+		$suppressed = ! apply_filters( 'wp_api_catalog_send_link_header', true );
+		remove_filter( 'wp_api_catalog_send_link_header', $off );
+		$this->assert( $suppressed, 'send_link_header filter can disable the front-end Link header' );
 	}
 
 	/**
